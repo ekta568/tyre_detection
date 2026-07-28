@@ -2,7 +2,7 @@ import requests
 import base64
 from prompt import TYRE_PROMPT
 
-API_KEY = "ABSKQmVkcm9ja0FQSUtleS03aWswLWF0LTI5NTE2NTg4NTg5OTpaU2doNjZaMWRCc0taaENkUHNGNjJWbk1yMGl4OC8wbEpKUHpMckJ1RHVINGNTZUhuN2FVbllWU3lBVT0="
+API_KEY = "AWS_BEARER_TOKEN_BEDROCK"
 
 MODEL_ID = "anthropic.claude-sonnet-5"
 
