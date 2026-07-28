@@ -53,22 +53,54 @@ Return and extract exact alphanumeric tyre serial number from the image. If unab
         "Authorization": f"Bearer {TOKEN}"
     }
 
-    response = requests.post(
-        URL,
-        headers=headers,
-        json=payload,
-        timeout=120
-    )
-
-    if response.status_code != 200:
-        return f"ERROR: {response.text}"
-
-    data = response.json()
-
     try:
-        return data["output"]["message"]["content"][-1]["text"]
+        response = requests.post(
+            URL,
+            headers=headers,
+            json=payload,
+            timeout=120
+        )
+
+        if response.status_code == 401:
+            return "Authentication failed. Please try again later."
+
+        elif response.status_code == 400:
+            return "Unable to process the uploaded image. Please try another image."
+
+        elif response.status_code == 408:
+            return "The request timed out. Please try again."
+
+        elif response.status_code in [429, 500, 502, 503, 504]:
+            return "Detection service is temporarily unavailable. Please try again later."
+
+        elif response.status_code != 200:
+            return "An unexpected error occurred. Please try again later."
+
+        data = response.json()
+
+        try:
+            result = data["output"]["message"]["content"][-1]["text"].strip()
+
+            if result.lower() == "improper image":
+                return "Improper Image"
+
+            return result
+
+        except (KeyError, IndexError, TypeError):
+            return "Received an invalid response from the detection service."
+
+    except requests.exceptions.Timeout:
+        return "The request timed out. Please try again."
+
+    except requests.exceptions.ConnectionError:
+        return "Unable to connect to the detection service. Please try again later."
+
+    except requests.exceptions.RequestException:
+        return "An unexpected error occurred. Please try again later."
+
     except Exception:
-        return str(data)
+        return "An unexpected error occurred. Please try again later."
+
 
 # STREAMLIT UI
 st.set_page_config(
