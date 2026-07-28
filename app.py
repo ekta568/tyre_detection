@@ -24,7 +24,7 @@ def detect_tyre_number(uploaded_file):
     }.get(file_extension)
 
     if image_format is None:
-        return None
+        return "ERROR: Unsupported image format"
 
     payload = {
         "messages": [
@@ -66,12 +66,13 @@ No additional text.
 
         response.raise_for_status()
 
-        result = response.json()["output"]["message"]["content"][-1]["text"].strip()
+        # Exact AWS Bedrock response
+        result = response.text
 
         return result
 
-    except Exception:
-        return None
+    except Exception as e:
+        return str(e)
 
 
 # ---------------- STREAMLIT UI ---------------- #
@@ -104,13 +105,8 @@ if uploaded_file:
             with st.spinner("Analyzing image..."):
                 result = detect_tyre_number(uploaded_file)
 
-            if result is None:
-                st.error("Something went wrong. Please try again later.")
-            else:
-                st.success("Completed")
-
-                st.text_input(
-                    "Detected Serial Number",
-                    value=result,
-                    disabled=True
-                )
+            st.text_input(
+                "Detected Serial Number",
+                value=result,
+                disabled=True
+            )
