@@ -3,7 +3,6 @@ import requests
 import os
 import base64
 
-
 TOKEN = os.getenv("AWS_BEARER_TOKEN_BEDROCK")
 
 URL = (
@@ -13,17 +12,19 @@ URL = (
 
 
 def detect_tyre_number(uploaded_file):
-
     image_bytes = uploaded_file.getvalue()
-
     image_b64 = base64.b64encode(image_bytes).decode("utf-8")
 
     file_extension = uploaded_file.name.split(".")[-1].lower()
 
-    if file_extension == "png":
-        image_format = "png"
-    else:
-        image_format = "jpeg"
+    image_format = {
+        "png": "png",
+        "jpg": "jpeg",
+        "jpeg": "jpeg",
+    }.get(file_extension)
+
+    if image_format is None:
+        return None
 
     payload = {
         "messages": [
@@ -40,7 +41,9 @@ def detect_tyre_number(uploaded_file):
                     },
                     {
                         "text": """
-Return and extract exact alphanumeric tyre serial number from the image. If unable to identify then return 'Improper Image'. No additional text.
+Return and extract exact alphanumeric tyre serial number from the image.
+If unable to identify then return 'Improper Image'.
+No additional text.
 """
                     }
                 ]
@@ -53,21 +56,26 @@ Return and extract exact alphanumeric tyre serial number from the image. If unab
         "Authorization": f"Bearer {TOKEN}"
     }
 
-    result = detect_image(image_path)
+    try:
+        response = requests.post(
+            URL,
+            headers=headers,
+            json=payload,
+            timeout=30
+        )
 
-    if result is None:
-        return {"message": "Something went wrong. Please try again later."}
+        response.raise_for_status()
 
-    if result == "Improper Image":
-        return {"message": "Improper Image"}
+        result = response.json()["output"]["message"]["content"][-1]["text"].strip()
 
-    # Continue with the normal flow
-    return {"message": result}
+        return result
 
-            return result
+    except Exception:
+        return None
 
 
-# STREAMLIT UI
+# ---------------- STREAMLIT UI ---------------- #
+
 st.set_page_config(
     page_title="Tyre Serial Number Detection",
     layout="wide"
@@ -77,7 +85,7 @@ st.title("Tyre Serial Number Detection")
 
 uploaded_file = st.file_uploader(
     "Upload Tyre Image",
-    type=["jpg","jpeg", "png"]
+    type=["jpg", "jpeg", "png"]
 )
 
 if uploaded_file:
@@ -86,11 +94,7 @@ if uploaded_file:
 
     with left:
         st.subheader("Tyre Image")
-
-        st.image(
-            uploaded_file,
-            use_container_width=True
-        )
+        st.image(uploaded_file, use_container_width=True)
 
     with right:
         st.subheader("Detection")
@@ -100,13 +104,13 @@ if uploaded_file:
             with st.spinner("Analyzing image..."):
                 result = detect_tyre_number(uploaded_file)
 
-        if result is None:
-            st.error("Something went wrong. Please try again.")
-        else:
-            st.success("Completed")
-            st.text_input(
-                "Detected Serial Number",
-                value=result,
-                disabled=True
-            )
+            if result is None:
+                st.error("Something went wrong. Please try again later.")
+            else:
+                st.success("Completed")
 
+                st.text_input(
+                    "Detected Serial Number",
+                    value=result,
+                    disabled=True
+                )
