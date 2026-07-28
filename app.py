@@ -67,7 +67,7 @@ No additional text.
         response.raise_for_status()
 
         # Exact AWS Bedrock response
-        result = response.text
+        result = response.json()["output"]["message"]["content"][0]["text"]
 
         return result
 
