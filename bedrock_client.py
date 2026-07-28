@@ -41,7 +41,7 @@ def detect_tyre_number(image_bytes):
     }
 
     response = requests.post(
-        "YOUR_BEDROCK_ENDPOINT",
+        "https://bedrock-runtime.ap-south-1.amazonaws.com/model/global.anthropic.claude-sonnet-5/converse",
         headers=headers,
         json=payload
     )

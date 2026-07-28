@@ -3,9 +3,6 @@ import requests
 import os
 import base64
 
-# =====================================================
-# CONFIG
-# =====================================================
 
 TOKEN = os.getenv("AWS_BEARER_TOKEN_BEDROCK")
 
@@ -14,9 +11,6 @@ URL = (
     "model/global.anthropic.claude-sonnet-5/converse"
 )
 
-# =====================================================
-# OCR FUNCTION
-# =====================================================
 
 def detect_tyre_number(uploaded_file):
 
@@ -76,9 +70,7 @@ Return and extract exact alphanumeric tyre serial number from the image. If unab
     except Exception:
         return str(data)
 
-# =====================================================
 # STREAMLIT UI
-# =====================================================
 st.set_page_config(
     page_title="Tyre Serial Number Detection",
     layout="wide"
@@ -88,7 +80,7 @@ st.title("Tyre Serial Number Detection")
 
 uploaded_file = st.file_uploader(
     "Upload Tyre Image",
-    type=["jpg", "jpeg", "png"]
+    type=[ "jpeg", "png"]
 )
 
 if uploaded_file:
