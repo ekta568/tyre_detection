@@ -2,6 +2,8 @@ import streamlit as st
 import requests
 import os
 import base64
+from PIL import Image
+from io import BytesIO
 
 TOKEN = os.getenv("AWS_BEARER_TOKEN_BEDROCK")
 
@@ -12,19 +14,21 @@ URL = (
 
 
 def detect_tyre_number(uploaded_file):
-    image_bytes = uploaded_file.getvalue()
+    image = Image.open(uploaded_file)
+
+    # Convert phone image formats (HEIC etc.) to JPEG
+    image = image.convert("RGB")
+
+    # Reduce large phone images
+    image.thumbnail((1600, 1600))
+
+    buffer = BytesIO()
+    image.save(buffer, format="JPEG", quality=85)
+
+    image_bytes = buffer.getvalue()
     image_b64 = base64.b64encode(image_bytes).decode("utf-8")
 
-    file_extension = uploaded_file.name.split(".")[-1].lower()
-
-    image_format = {
-        "png": "png",
-        "jpg": "jpeg",
-        "jpeg": "jpeg",
-    }.get(file_extension)
-
-    if image_format is None:
-        return "ERROR: Unsupported image format"
+    image_format = "jpeg"
 
     payload = {
         "messages": [
@@ -33,7 +37,7 @@ def detect_tyre_number(uploaded_file):
                 "content": [
                     {
                         "image": {
-                            "format": image_format,
+                            "format": "jpeg",
                             "source": {
                                 "bytes": image_b64
                             }
@@ -67,7 +71,7 @@ No additional text.
         response.raise_for_status()
 
         # Exact AWS Bedrock response
-        result = response.json()["output"]["message"]["content"][0]["text"]
+        result = response.json()["output"]["message"]["content"][0]["text"].strip()
 
         return result
 
@@ -95,7 +99,7 @@ if uploaded_file:
 
     with left:
         st.subheader("Tyre Image")
-        st.image(uploaded_file, use_container_width=True)
+        st.image(Image.open(uploaded_file), use_container_width=True)
 
     with right:
         st.subheader("Detection")
