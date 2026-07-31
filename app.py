@@ -45,9 +45,7 @@ def detect_tyre_number(uploaded_file):
                     },
                     {
                         "text": """
-Return and extract exact alphanumeric tyre serial number from the image.
-If unable to identify then return 'Improper Image'.
-No additional text.
+Extract the exact alphanumeric tyre serial number from the image. Do not hallucinate or guess. If any character is unclear, missing, or not fully visible, return exactly 'Improper Image'. No additional text in response strictly.
 """
                     }
                 ]
