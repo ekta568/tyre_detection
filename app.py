@@ -45,7 +45,16 @@ def detect_tyre_number(uploaded_file):
                     },
                     {
                         "text": """
-Extract the exact alphanumeric tyre serial number from the image. The serial number may start with "DOT" or may not start with "DOT". If it starts with "DOT", consider "DOT" as a prefix and return only the alphanumeric serial number that follows it, without including "DOT". If it does not start with "DOT", return the complete serial number exactly as shown. Do not hallucinate, infer, guess, or modify any characters. The complete serial number must be clearly readable and fully visible in the image. If any character is unclear, missing, obscured, or not fully visible, return exactly 'Improper Image'. No additional text.
+Extract the exact alphanumeric tyre serial number from the image. 
+The serial number may start with "DOT" or may not start with "DOT". 
+If it starts with "DOT", consider "DOT" as a prefix and return only the alphanumeric serial number that follows it, without including "DOT". 
+If it does not start with "DOT", return the complete serial number exactly as shown. 
+Do not hallucinate, infer, guess, or modify any characters. 
+The complete serial number must be clearly readable and fully visible in the image. 
+If any character is unclear, missing, obscured, or not fully visible, return exactly 'Improper Image'. 
+No additional text in response strictly.
+
+
 """
                     }
                 ]
